@@ -1,24 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:tapiwa_app/authentication/LoginClient.dart';
+import 'package:tapiwa_app/models/LoginResponseModel.dart';
 import 'package:tapiwa_app/ui/home.dart';
 import 'package:tapiwa_app/ui/register.dart';
+import 'package:tapiwa_app/utils/auth.dart';
+import 'package:tapiwa_app/utils/auth.dart';
+import 'package:http/http.dart' as http;
+import 'package:tapiwa_app/utils/LoginUtil.dart';
+import 'package:tapiwa_app/storage/SharedPreferenceManager.dart';
 
-class Login extends StatefulWidget{
-
+class Login extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
     return LoginState();
   }
-
-
-
 }
 
-class LoginState extends State<Login>{
+class LoginState extends State<Login> {
+  final auth = new Auth();
+  final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
+
+  bool isEmailValid(email) {
+    bool emailValid = RegExp(
+            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(email);
+    return !emailValid;
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
 
+    final LoginAuth loginAuth = new LoginAuth();
+    final LoginUtil loginUtil = new LoginUtil();
+
+
+
+
+    TextEditingController emailController = new TextEditingController();
+    TextEditingController passwordController = new TextEditingController();
 
     final logo = Hero(
       tag: 'hero',
@@ -31,36 +53,65 @@ class LoginState extends State<Login>{
     final email = TextFormField(
       keyboardType: TextInputType.emailAddress,
       autofocus: false,
-      initialValue: 'tapiwatererai395@gmail.com',
+      controller: emailController,
       decoration: InputDecoration(
         hintText: 'Email',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      validator: (value) {
+        if (isEmailValid(value) || value.isEmpty) {
+          return 'Please enter valid email';
+        }
+        return null;
+      },
     );
 
     final password = TextFormField(
       autofocus: false,
-      initialValue: 'some password',
+      controller: passwordController,
       obscureText: true,
       decoration: InputDecoration(
         hintText: 'Password',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      validator: (value) {
+        if (value.isEmpty || value.length < 6) {
+          return 'Your Password must be more than 6 chars';
+        }
+        return null;
+      },
     );
 
-    final loginButton = Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.0),
-      child: RaisedButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        onPressed: ()=>Navigator.of(context).push(new MaterialPageRoute(
-            builder: (context) => new Home())),
-        padding: EdgeInsets.all(12),
-        color: Colors.brown,
-        child: Text('Log In', style: TextStyle(color: Colors.white)),
+    final loginButton = !isLoading
+        ? Padding(
+        padding: EdgeInsets.symmetric(vertical: 16.0),
+        child: RaisedButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          onPressed: () {
+            if (_formKey.currentState.validate()) {
+              print('loading');
+              setState(() {
+                isLoading = true;
+              });
+
+             loginAuth.login(emailController.text, passwordController.text, "password", loginUtil.getClientAuthorizationHeader());
+
+//             sharedPreferenceManager.saveUserCredentials(loginResponseModel);
+
+            }
+          },
+          padding: EdgeInsets.all(12),
+          color: Colors.brown,
+          child: Text('Log In', style: TextStyle(color: Colors.white)),
+        ))
+        : Center(
+      child: CircularProgressIndicator(
+        backgroundColor: Colors.cyan,
+        strokeWidth: 5,
       ),
     );
 
@@ -77,8 +128,8 @@ class LoginState extends State<Login>{
         'Sign Up',
         style: TextStyle(color: Colors.black54),
       ),
-      onPressed: ()=>Navigator.of(context).push(new MaterialPageRoute(
-        builder: (context) => new Register())),
+      onPressed: () => Navigator.of(context)
+          .push(new MaterialPageRoute(builder: (context) => new Register())),
     );
 
     return new Scaffold(
@@ -90,17 +141,25 @@ class LoginState extends State<Login>{
           children: <Widget>[
             logo,
             SizedBox(height: 48.0),
-            email,
-            SizedBox(height: 8.0),
-            password,
-            SizedBox(height: 24.0),
-            loginButton,
-            forgotLabel,
-            registerLabel
+            Form(
+              key: _formKey,
+              child: Column(
+                children: <Widget>[
+                  email,
+                  SizedBox(height: 8.0),
+                  password,
+                  SizedBox(height: 24.0),
+                  loginButton,
+                  forgotLabel,
+                  registerLabel
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+
 
 }

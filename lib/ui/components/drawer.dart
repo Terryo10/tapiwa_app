@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tapiwa_app/ui/cart.dart';
 import 'package:tapiwa_app/ui/login.dart';
+import 'package:tapiwa_app/ui/product_details.dart';
 
 class DrawerApp extends StatefulWidget{
   @override
@@ -94,6 +95,15 @@ class DrawerState extends State<DrawerApp>{
             ),
           ),
 
+
+          InkWell(
+            onTap:()=> Navigator.of(context).push(new MaterialPageRoute(
+                builder: (context) => new ProductDetails())),
+            child: ListTile(
+              title: Text('productD'),
+              leading: Icon(Icons.help, color: Colors.green),
+            ),
+          ),
           InkWell(
             onTap: ()=> Navigator.of(context).push(new MaterialPageRoute(
                 builder: (context) => new Login())),
