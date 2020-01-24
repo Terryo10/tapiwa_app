@@ -1,3 +1,5 @@
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:tapiwa_app/authentication/LoginClient.dart';
 import 'package:tapiwa_app/models/LoginResponseModel.dart';
@@ -8,6 +10,12 @@ import 'package:tapiwa_app/utils/auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:tapiwa_app/utils/LoginUtil.dart';
 import 'package:tapiwa_app/storage/SharedPreferenceManager.dart';
+
+import 'package:flutter/material.dart';
+import 'package:chopper/chopper.dart';
+import 'package:provider/provider.dart';
+
+import 'package:tapiwa_app/api/api_service.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -29,19 +37,18 @@ class LoginState extends State<Login> {
     return !emailValid;
   }
 
+
+   TextEditingController emailController = new TextEditingController();
+   TextEditingController passwordController = new TextEditingController();
+
+     final LoginUtil loginUtil = new LoginUtil();
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    final LoginAuth loginAuth = new LoginAuth();
-    final LoginUtil loginUtil = new LoginUtil();
-
-
-
-
-    TextEditingController emailController = new TextEditingController();
-    TextEditingController passwordController = new TextEditingController();
-
+    //final LoginAuth loginAuth = new LoginAuth();
+  
     final logo = Hero(
       tag: 'hero',
       child: CircleAvatar(
@@ -98,8 +105,14 @@ class LoginState extends State<Login> {
                 isLoading = true;
               });
 
-             loginAuth.login(emailController.text, passwordController.text, "password", loginUtil.getClientAuthorizationHeader());
+             //loginAuth.login(emailController.text, passwordController.text, "password", loginUtil.getClientAuthorizationHeader());
+                 
+                 _authenticate(context);
 
+                // FutureBuilder<LoginResponseModel> builder = 
+                // LoginService.create(
+                // .loginUser(emailController.text, passwordController.text, "password", loginUtil.getClientAuthorizationHeader()) as FutureBuilder<LoginResponseModel>;
+           
 //             sharedPreferenceManager.saveUserCredentials(loginResponseModel);
 
             }
@@ -160,6 +173,39 @@ class LoginState extends State<Login> {
       ),
     );
   }
+
+
+  FutureBuilder<Response<LoginResponseModel>> _authenticate(BuildContext context) {
+
+
+        return FutureBuilder<Response<LoginResponseModel>>(
+    
+    
+          future: Provider.of<LoginService>(context).loginUser(emailController.text, passwordController.text, "password", loginUtil.getClientAuthorizationHeader()),
+          
+         builder: (context,snapshot){
+
+           if(snapshot.connectionState == ConnectionState.done){
+            
+              return new Text("Login Successful");
+
+           }
+
+           else {
+          // Show a loading indicator while waiting for the posts
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+         },
+
+    );
+
+  }
+
+
+
 
 
 }

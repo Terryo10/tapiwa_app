@@ -25,6 +25,7 @@ class BottomNavState extends State<BottomNav> {
           icon: new Icon(Icons.shopping_cart),
           title: new Text('My Cart'),
 
+
         ),
         BottomNavigationBarItem(
             icon: Icon(Icons.motorcycle),
